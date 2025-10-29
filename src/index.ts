@@ -1,5 +1,4 @@
 interface Env {}
-import { Buffer } from "node:buffer";
 import Mailgun from "mailgun.js";
 const mailgun = new Mailgun(FormData);
 export default {
@@ -17,12 +16,12 @@ export default {
 			subject: 'Hello from cloudflare workers',
 			text: 'Testing some Mailgun awesomness!',
 			html: '<a href="https://google.com">Test</a>',
-			attachments: [
+			attachment:
 				{
 					filename: 'test_buffer.txt',
-					data: Buffer.from('Hello World from Mailgun.js')
+					data: new Blob(['Hello World from Mailgun.js']),
 				}
-			]
+
 		};
 		let res;
 		try {
