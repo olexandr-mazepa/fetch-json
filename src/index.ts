@@ -1,4 +1,5 @@
 interface Env {}
+import { Buffer } from "node:buffer";
 import Mailgun from "mailgun.js";
 const mailgun = new Mailgun(FormData);
 export default {
