@@ -1,22 +1,30 @@
 interface Env {}
+import Mailgun from "mailgun.js";
+const mailgun = new Mailgun(FormData);
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		const url = "https://jsonplaceholder.typicode.com/todos/1";
 
-		// gatherResponse returns both content-type & response body as a string
-		async function gatherResponse(response) {
-			const { headers } = response;
-			const contentType = headers.get("content-type") || "";
-			if (contentType.includes("application/json")) {
-				return { contentType, result: JSON.stringify(await response.json()) };
-			}
-			return { contentType, result: response.text() };
+		const mailgunClient = mailgun.client({
+			"username": "api",
+			"key": env.SECRET_KEY || "",
+			"url": env.URL || "",
+			useFetch: true,
+		});
+		const messageData =  {
+			from: 'postmaster@mailgun.zeefarmer.com',
+			to: ['zepa1993@gmail.com'],
+			subject: 'Hello from cloudflare workers',
+			text: 'Testing some Mailgun awesomness!',
+			html: '<a href="https://google.com">Test</a>',
+		};
+		let res;
+		try {
+			res = await mailgunClient.messages.create(env.DOMAIN || "", messageData);
+		} catch (error) {
+			console.error("Error sending email:", error);
 		}
 
-		const response = await fetch(url);
-		const { contentType, result } = await gatherResponse(response);
-
-		const options = { headers: { "content-type": contentType } };
-		return new Response(result, options);
+		const options = { headers: { "content-type": "application/json" } };
+		return new Response(res ? JSON.stringify(res) : "Error sending email", options);
 	},
 } satisfies ExportedHandler<Env>;
